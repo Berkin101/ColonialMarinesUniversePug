@@ -1,0 +1,143 @@
+- type: entity
+  id: razorwireBase
+  abstract: true
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: BarricadeRazorwire
+  - type: Tag
+    tags:
+    - Metal
+  - type: Damageable
+    damageContainer: Inorganic
+  - type: Sprite
+    sprite: Structures/barbed.rsi
+    layers:
+    - state: barbed_wire
+    drawdepth: WallTops
+ # - type: DamageVisuals     # I tried to make it with two states: one undamaged and one broken.
+ #   thresholds: [ 2 ]
+ #   damageDivisor: 50
+ #   trackAllDamage: true
+ #   damageOverlay:
+ #     sprite: Structures/barbed.rsi
+ #     layers:
+  #    - state: barbed_wire_broken
+  - type: InteractionPopup
+    interactSuccessString: fence-rattle-success
+    messagePerceivedByOthers: fence-rattle-success
+    interactSuccessSound:
+      collection: FenceRattle
+  - type: FootstepModifier
+    footstepSoundCollection:
+      collection: FootstepBarbedWire
+      params:
+        volume: 8
+  - type: MeleeSound
+    soundGroups:
+      Brute:
+        path:
+          "/Audio/_RMC14/Items/barbed_wire_movement.ogg"
+  - type: Barricade
+  - type: RMCDropshipBlocked
+  - type: Appearance
+  - type: Clickable
+  - type: Transform
+    anchored: true
+  - type: Physics
+  - type: SpiderWebObject
+  - type: BarbedWire # redundant
+  - type: Butcherable # using this for now, could not find a component that lets me "cut" the razorwire
+    butcheringType: Knife
+    butcherDelay: 2
+    spawned:
+    - id: razorwireItem
+      amount: 1
+  - type: TrayScanReveal
+
+- type: entity
+  id: razorwire
+  parent: razorwireBase
+  name: razorwire
+  description: A set of razorwire, able to slow down anything that tries to move through it.
+  components:
+  - type: Fixtures
+    fixtures:
+      fix1:
+        hard: false
+        density: 7
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        layer:
+        - SlipLayer
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 35
+      behaviors:
+      - !type:DoActsBehavior
+        acts: ["Destruction"]
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          PartRodMetal: #barbed wire instead maybe?
+            min: 0
+            max: 2
+  - type: SpeedModifierContacts
+    walkSpeedModifier: 0.3
+    sprintSpeedModifier: 0.3
+
+  #- type: RCDDeconstructable
+  #  cost: 2
+  #  delay: 2
+  #  deconstructTools: [ Cutting ]
+  #  itemDrop: BarbedWire1
+  #  fx: EffectRCDDeconstruct2
+  #- type: TrayScanReveal
+
+- type: entity
+  parent: BaseItem
+  id: razorwireItem
+  name: razor wire
+  description: A set of razorwire, able to slow down anything that tries to move through it. Can be placed down as fortification.
+  components:
+  - type: Item
+    size: Small
+  - type: Sprite
+    sprite: Structures/barbed.rsi
+    layers:
+    - state: Barbed
+    - map: [ "acided" ]
+  - type: RazorwireItem
+  - type: Stack
+    stackType: razorwireItem
+    count: 1
+  - type: InteractedBlacklist
+    blacklist:
+      components:
+      - Xeno
+
+- type: entity
+  parent: razorwireItem
+  id: razorwireItem20
+  suffix: "20"
+  components:
+  - type: Stack
+    stackType: razorwireItem
+    count: 20
+
+- type: entity
+  parent: razorwireItem
+  id: razorwireItem40
+  suffix: "40"
+  components:
+  - type: Stack
+    stackType: razorwireItem
+    count: 40
+
+- type: stack
+  id: razorwireItem
+  name: razor wires
+  spawn: razorwireItem
+  maxCount: 60
